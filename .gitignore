@@ -1,0 +1,6 @@
+# Julia runtime downloaded by build_bundle.sh / build_bundle.bat
+julia/
+julia.download
+
+# macOS
+.DS_Store

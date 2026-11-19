@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KADMOS HMC</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f6e6e'/%3E%3Cpath d='M6 9c6 0 8 14 20 14' stroke='white' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='9' cy='22' r='2.4' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/app.css">
+<script>
+  try { const t = localStorage.getItem("kadmos-theme"); if (t) document.documentElement.dataset.theme = t;
+        else if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.theme = "dark"; } catch (e) {}
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="var(--accent)"/><path d="M6 9c6 0 8 14 20 14" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="9" cy="22" r="2.4" fill="#fff"/><circle cx="23" cy="10" r="1.6" fill="#fff" opacity=".7"/></svg>
+    <div>
+      <div class="brand-name">KADMOS<small>HMC</small></div>
+      <div class="brand-sub">Bayesian inversion of <sup>40</sup>Ar/<sup>39</sup>Ar ages</div>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-view="setup">Setup</button>
+    <button class="tab" data-view="monitor">Run <span class="dot" id="run-dot" hidden></span></button>
+    <button class="tab" data-view="results">Results</button>
+    <button class="tab" data-view="guide">Guide</button>
+  </nav>
+  <div class="spacer"></div>
+  <span class="pill" id="engine-pill"><span class="led"></span><span id="engine-text">Connecting…</span></span>
+  <button class="icon-btn" id="theme-btn" title="Light / dark theme" aria-label="Toggle theme">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+
+<main>
+<!-- ======================================================= SETUP -->
+<section class="view active" id="view-setup">
+  <div class="page-head">
+    <div>
+      <h1>Inversion setup</h1>
+      <p>Invert a measured age for the <b>initial temperature</b>, <b>initial cooling rate</b>, <b>effective grain size</b> and <b>total model time</b> with Hamiltonian Monte Carlo and the KADMOS diffusion model.</p>
+    </div>
+    <div class="spacer"></div>
+    <div class="row">
+      <button class="btn ghost" id="btn-load"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5M12 15V3m0 0L7 8m5-5 5 5"/></svg>Load settings</button>
+      <button class="btn ghost" id="btn-save"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5M12 3v12m0 0-5-5m5 5 5-5"/></svg>Save settings</button>
+      <button class="btn ghost" id="btn-reset">Reset defaults</button>
+      <input type="file" id="file-load" accept=".json,application/json" hidden>
+    </div>
+  </div>
+
+  <div class="setup-grid">
+    <div>
+      <!-- 1 Observed data -->
+      <div class="card">
+        <div class="card-head"><span class="step">1</span><h2>Observed data</h2><span class="hint">Measured mineral age</span></div>
+        <div class="card-body">
+          <div class="fields">
+            <div class="field"><label>Observed age</label><div class="input"><input type="number" step="any" data-k="observed_age"><span class="unit">Myr</span></div></div>
+            <div class="field"><label>Age uncertainty (1σ)</label><div class="input"><input type="number" step="any" min="0" data-k="age_uncertainty"><span class="unit">Myr</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 Priors -->
+      <div class="card">
+        <div class="card-head"><span class="step">2</span><h2>Inversion parameters (priors)</h2><span class="hint">4 parameters</span></div>
+        <div class="card-body">
+          <div class="params">
+            <div class="param" data-p="T0">
+              <div class="param-head">
+                <span class="param-sym">T<sub>0</sub></span>
+                <div class="param-name">Initial temperature<small>°C</small></div>
+                <div class="seg" data-seg="T0_prior"><button data-v="Uniform">Uniform</button><button data-v="Gaussian">Gaussian</button></div>
+              </div>
+              <div class="fields">
+                <div class="field"><label>Minimum</label><div class="input"><input type="number" step="any" data-k="T0_min"><span class="unit">°C</span></div></div>
+                <div class="field"><label>Maximum</label><div class="input"><input type="number" step="any" data-k="T0_max"><span class="unit">°C</span></div></div>
+                <div class="field gauss"><label>Mean</label><div class="input"><input type="number" step="any" data-k="T0_mean"><span class="unit">°C</span></div></div>
+                <div class="field gauss"><label>Std. deviation</label><div class="input"><input type="number" step="any" data-k="T0_std"><span class="unit">°C</span></div></div>
+              </div>
+              <div class="prior-plot" data-prior="T0"></div>
+            </div>
+            <div class="param" data-p="SCR">
+              <div class="param-head">
+                <span class="param-sym">CR</span>
+                <div class="param-name">Initial cooling rate<small>°C/Myr</small></div>
+                <div class="seg" data-seg="SCR_prior"><button data-v="Uniform">Uniform</button><button data-v="Gaussian">Gaussian</button></div>
+              </div>
+              <div class="fields">
+                <div class="field"><label>Minimum</label><div class="input"><input type="number" step="any" data-k="SCR_min"><span class="unit">°C/Myr</span></div></div>
+                <div class="field"><label>Maximum</label><div class="input"><input type="number" step="any" data-k="SCR_max"><span class="unit">°C/Myr</span></div></div>
+                <div class="field gauss"><label>Mean</label><div class="input"><input type="number" step="any" data-k="SCR_mean"><span class="unit">°C/Myr</span></div></div>
+                <div class="field gauss"><label>Std. deviation</label><div class="input"><input type="number" step="any" data-k="SCR_std"><span class="unit">°C/Myr</span></div></div>
+              </div>
+              <div class="prior-plot" data-prior="SCR"></div>
+            </div>
+            <div class="param" data-p="Lr">
+              <div class="param-head">
+                <span class="param-sym">L<sub>r</sub></span>
+                <div class="param-name">Effective grain size<small>μm</small></div>
+                <div class="seg" data-seg="Lr_prior"><button data-v="Uniform">Uniform</button><button data-v="Gaussian">Gaussian</button></div>
+              </div>
+              <div class="fields">
+                <div class="field"><label>Minimum</label><div class="input"><input type="number" step="any" min="0" data-k="Lr_min"><span class="unit">μm</span></div></div>
+                <div class="field"><label>Maximum</label><div class="input"><input type="number" step="any" data-k="Lr_max"><span class="unit">μm</span></div></div>
+                <div class="field gauss"><label>Mean</label><div class="input"><input type="number" step="any" data-k="Lr_mean"><span class="unit">μm</span></div></div>
+                <div class="field gauss"><label>Std. deviation</label><div class="input"><input type="number" step="any" min="0" data-k="Lr_std"><span class="unit">μm</span></div></div>
+              </div>
+              <div class="prior-plot" data-prior="Lr"></div>
+            </div>
+            <div class="param" data-p="tlim">
+              <div class="param-head">
+                <span class="param-sym">t<sub>lim</sub></span>
+                <div class="param-name">Total model time<small>Myr</small></div>
+                <div class="seg" data-seg="tlim_prior"><button data-v="Uniform">Uniform</button><button data-v="Gaussian">Gaussian</button></div>
+              </div>
+              <div class="fields">
+                <div class="field"><label>Minimum</label><div class="input"><input type="number" step="any" min="0" data-k="tlim_min"><span class="unit">Myr</span></div></div>
+                <div class="field"><label>Maximum</label><div class="input"><input type="number" step="any" data-k="tlim_max"><span class="unit">Myr</span></div></div>
+                <div class="field gauss"><label>Mean</label><div class="input"><input type="number" step="any" data-k="tlim_mean"><span class="unit">Myr</span></div></div>
+                <div class="field gauss"><label>Std. deviation (1σ)</label><div class="input"><input type="number" step="any" min="0" data-k="tlim_std"><span class="unit">Myr</span></div></div>
+              </div>
+              <div class="prior-plot" data-prior="tlim"></div>
+              <div class="note tlim-row"><span id="tlim-note"></span><button class="btn ghost sm" id="btn-tlim-3s" type="button">Set limits to mean ± 3σ</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Model -->
+      <div class="card">
+        <div class="card-head"><span class="step">3</span><h2>Model settings</h2><span class="hint">P–T–t path, mineral and geometry</span></div>
+        <div class="card-body">
+          <div class="subhead">P–T–t path</div>
+          <div class="choices" data-choice="type_path">
+            <button class="choice" data-v="asy-CR"><b>Asymptotic cooling</b><span>T = T₀ / (1 + CR·t / T₀), constant P</span></button>
+            <button class="choice" data-v="lin-CR"><b>Linear cooling</b><span>T = T₀ − CR·t, constant P</span></button>
+            <button class="choice" data-v="lin-P-T"><b>Linear P–T</b><span>T₀→T<sub>min</sub>, P₀→P<sub>min</sub> over t<sub>lim</sub> (CR not used)</span></button>
+            <button class="choice" data-v="iso-T"><b>Isothermal</b><span>T = T₀ throughout (CR not used)</span></button>
+            <button class="choice" data-v="loaded"><b>Loaded path</b><span>Your own P–T–t table</span></button>
+          </div>
+          <div id="ptt-box" hidden style="margin-top:12px">
+            <div class="row" style="justify-content:space-between;margin-bottom:6px">
+              <span class="label">P–T–t table · columns: P (MPa), T (°C), t (Myr)</span>
+              <span class="row"><button class="btn sm" id="ptt-file-btn">Open file…</button><input type="file" id="ptt-file" accept=".dat,.txt,.csv" hidden></span>
+            </div>
+            <textarea class="code" data-k="ptt_data" spellcheck="false" placeholder="1100  650  0&#10;1000  500  20&#10; 500  300  80&#10;  10   25  165.5"></textarea>
+            <div class="help" id="ptt-status" style="font-size:12px;margin-top:4px"></div>
+          </div>
+
+          <div class="fields" style="margin-top:18px">
+            <div class="field"><label>Geometry</label>
+              <div class="seg full" data-seg="geometry"><button data-v="1">Plane</button><button data-v="2">Cylinder</button><button data-v="3">Sphere</button></div>
+            </div>
+            <div class="field"><label>Mineral system (diffusion data)</label>
+              <div class="input select"><select data-k="mineral" id="mineral-select"></select></div>
+            </div>
+          </div>
+          <table class="diff-table" id="diff-table"></table>
+          <div id="custom-box" hidden style="margin-top:12px">
+            <div class="fields">
+              <div class="field"><label>D₀</label><div class="input"><input type="number" step="any" data-k="custom_D0"><span class="unit">cm²/s</span></div></div>
+              <div class="field"><label>Activation energy Ea</label><div class="input"><input type="number" step="any" data-k="custom_Ea"><span class="unit">J/mol</span></div></div>
+              <div class="field"><label>Activation volume Va</label><div class="input"><input type="number" step="any" data-k="custom_Va"><span class="unit">J/MPa/mol</span></div></div>
+              <div class="field"><label>Reference pressure</label><div class="input"><input type="number" step="any" data-k="custom_Pref"><span class="unit">MPa</span></div></div>
+            </div>
+          </div>
+
+          <div class="subhead">Conditions</div>
+          <div class="fields">
+            <div class="field"><label>Initial pressure P₀</label><div class="input"><input type="number" step="any" data-k="P0"><span class="unit">MPa</span></div></div>
+            <div class="field"><label>Final pressure P<sub>min</sub></label><div class="input"><input type="number" step="any" data-k="Pmin"><span class="unit">MPa</span></div></div>
+            <div class="field"><label>Final temperature T<sub>min</sub></label><div class="input"><input type="number" step="any" data-k="Tmin"><span class="unit">°C</span></div></div>
+            <div class="field"><label>Initial age</label><div class="input"><input type="number" step="any" min="0" data-k="Age0"><span class="unit">Myr</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Sampler -->
+      <div class="card">
+        <div class="card-head"><span class="step">4</span><h2>HMC sampler</h2><span class="hint">One chain per random seed</span></div>
+        <div class="card-body">
+          <div class="fields">
+            <div class="field"><label>Sampler</label>
+              <div class="seg full" data-seg="sampler_type"><button data-v="NUTS">NUTS (adaptive)</button><button data-v="HMC">HMC</button></div>
+            </div>
+            <div class="field"><label>Samples per chain</label><div class="input"><input type="number" step="1" min="10" data-k="n_samples"><span class="unit">draws</span></div></div>
+            <div class="field hmc-only"><label>Step size ε</label><div class="input"><input type="number" step="any" min="0" data-k="hmc_step_size"></div></div>
+            <div class="field hmc-only"><label>Leapfrog steps</label><div class="input"><input type="number" step="1" min="1" data-k="hmc_leapfrog_steps"></div></div>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label>Random seeds <span class="help" style="font-weight:400">— press Enter or comma to add</span></label>
+            <div class="chips" id="seed-chips"><input id="seed-input" placeholder="add seed…" inputmode="numeric"></div>
+            <div class="row" style="margin-top:6px">
+              <button class="btn sm" id="seed-random">+ Random seed</button>
+              <button class="btn sm ghost" id="seed-clear">Clear</button>
+              <span class="spacer"></span>
+              <label class="switch"><input type="checkbox" data-k="parallel"><span class="track"></span><span>Run chains in parallel <span class="help" id="parallel-help"></span></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 Numerical -->
+      <div class="card">
+        <div class="card-head"><span class="step">5</span><h2>Numerical settings</h2><span class="hint">Finite-element diffusion solver</span></div>
+        <div class="card-body">
+          <div class="fields">
+            <div class="field"><label>Time steps n<sub>t</sub></label><div class="input"><input type="number" step="1" min="10" data-k="nt"></div><span class="help">More steps: more accurate, slower</span></div>
+            <div class="field"><label>Elements n<sub>els</sub></label><div class="input"><input type="number" step="1" min="5" data-k="nels"></div><span class="help">Radial grid resolution</span></div>
+            <div class="field"><label>θ (time integration)</label><div class="input"><input type="number" step="0.05" min="0.5" max="1" data-k="theta"></div><span class="help">1 = implicit, 0.5 = Crank–Nicolson</span></div>
+            <div class="field"><label>RdX (grid refinement)</label><div class="input"><input type="number" step="any" min="0" data-k="RdX"></div><span class="help">Ratio of first to last cell size; 1 = regular</span></div>
+            <div class="field"><label>Linear solver</label><div class="input select"><select data-k="chol_sol"><option value="0">Direct (fast, recommended)</option><option value="1">Cholesky (forward check only)</option></select></div><span class="help" id="solver-help"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== aside ===== -->
+    <aside class="aside">
+      <div class="card" style="margin:0">
+        <div class="card-head"><h2>Start inversion</h2></div>
+        <div class="card-body">
+          <div class="summary-chips" id="run-summary"></div>
+          <div class="field" style="margin-bottom:14px"><label>Run name <span class="help" style="font-weight:400">— folder in results/</span></label><div class="input"><input type="text" data-k="run_name" spellcheck="false"></div></div>
+          <ul class="errors" id="errors" hidden></ul>
+          <button class="btn primary big" id="btn-run">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>
+            Start inversion
+          </button>
+          <div class="help" id="run-hint" style="margin-top:8px;font-size:12px;color:var(--ink-3)"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin:0">
+        <div class="card-head"><h2>P–T–t path preview</h2><span class="hint">prior range</span></div>
+        <div class="preview" id="path-preview"></div>
+        <div class="legend" style="padding:0 20px 14px;margin:0" id="path-legend"></div>
+      </div>
+
+      <div class="card" style="margin:0">
+        <div class="card-head"><h2>Forward model check</h2></div>
+        <div class="card-body">
+          <p class="card-sub" style="margin:0 0 12px">Run KADMOS once with the values below to check that your settings can reproduce the observed age.</p>
+          <div class="fields two">
+            <div class="field"><label style="color:var(--c-T0)">T₀</label><div class="input"><input type="number" step="any" id="fw_T0"><span class="unit">°C</span></div></div>
+            <div class="field"><label style="color:var(--c-SCR)">Cooling rate</label><div class="input"><input type="number" step="any" id="fw_SCR"><span class="unit">°C/Myr</span></div></div>
+            <div class="field"><label style="color:var(--c-Lr)">Grain size</label><div class="input"><input type="number" step="any" id="fw_Lr"><span class="unit">μm</span></div></div>
+            <div class="field"><label style="color:var(--c-tlim)">Model time</label><div class="input"><input type="number" step="any" id="fw_tlim"><span class="unit">Myr</span></div></div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn" id="btn-forward">Compute age</button>
+            <button class="btn ghost sm" id="btn-fw-center">Use prior centres</button>
+          </div>
+          <div id="fw-out"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================================================= MONITOR -->
+<section class="view" id="view-monitor">
+  <div id="monitor-empty" class="card empty">
+    <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    <h3>No inversion running</h3>
+    <p>Set up your inversion and press <b>Start inversion</b>.</p>
+    <button class="btn primary" data-goto="setup" style="margin-top:8px">Go to setup</button>
+  </div>
+  <div id="monitor" hidden>
+    <div class="card">
+      <div class="monitor-head">
+        <div>
+          <div class="row"><h2 class="monitor-title" id="mon-name"></h2><span class="state" id="mon-state"></span></div>
+          <div style="color:var(--ink-3);font-size:13px;margin-top:2px" id="mon-phase"></div>
+        </div>
+        <div class="row">
+          <button class="btn" id="mon-folder">Open folder</button>
+          <button class="btn danger" id="mon-cancel">Stop run</button>
+          <button class="btn primary" id="mon-results" hidden>View results →</button>
+        </div>
+      </div>
+      <div style="padding:0 22px 20px">
+        <div class="big-progress"><div id="mon-bar" style="width:0%"></div></div>
+        <div class="stats-row">
+          <div class="stat"><div class="k">Progress</div><div class="v" id="mon-pct">0%</div></div>
+          <div class="stat"><div class="k">Elapsed</div><div class="v" id="mon-elapsed">–</div></div>
+          <div class="stat"><div class="k">Remaining (est.)</div><div class="v" id="mon-eta">–</div></div>
+          <div class="stat"><div class="k">Model evaluations</div><div class="v" id="mon-evals">0</div></div>
+          <div class="stat"><div class="k">Chains</div><div class="v" id="mon-chains">–</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="chain-grid" id="mon-chain-grid" style="margin-bottom:18px"></div>
+    <div class="card">
+      <div class="card-head"><h2>Log</h2>
+        <span class="hint row"><label class="switch"><input type="checkbox" id="log-warn-only"><span class="track"></span>Warnings only</label>
+        <label class="switch"><input type="checkbox" id="log-follow" checked><span class="track"></span>Follow</label></span></div>
+      <div class="card-body"><div class="console" id="console"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= RESULTS -->
+<section class="view" id="view-results">
+  <div class="results-grid">
+    <div class="card" style="margin:0;position:sticky;top:86px">
+      <div class="card-head"><h2>Runs</h2><span class="hint row"><button class="btn sm ghost" id="runs-refresh" title="Refresh">↻</button><button class="btn sm ghost" id="runs-folder">Folder</button></span></div>
+      <div class="run-list" id="run-list"></div>
+    </div>
+    <div id="res-main">
+      <div class="card empty" id="res-empty">
+        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.4"><path d="M4 19V5m0 14h16M8 15l3-4 3 2 5-7"/></svg>
+        <h3>Select a run</h3>
+        <p>Finished inversions appear on the left. Each run folder in <code>results/</code> is listed.</p>
+      </div>
+      <div id="res" hidden></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= GUIDE -->
+<section class="view" id="view-guide">
+  <div class="card"><div class="card-body guide" style="padding:28px 32px">
+    <h3>What the app does</h3>
+    <p>KADMOS computes apparent <sup>40</sup>Ar/<sup>39</sup>Ar ages of a mineral grain by solving argon diffusion and production along a pressure–temperature–time (P–T–t) path with the finite element method. The inversion finds which combinations of <b>initial temperature T₀</b>, <b>initial cooling rate</b>, <b>effective grain size L<sub>r</sub></b> and <b>total model time t<sub>lim</sub></b> are compatible with your measured age, using Hamiltonian Monte Carlo (Turing.jl). The model age compared with the measurement is the maximum apparent age in the grain.</p>
+    <h3>Workflow</h3>
+    <ol>
+      <li><b>Setup</b> — enter the measured age, choose the priors, path, mineral and sampler settings. Use the <i>forward model check</i> to see the age predicted for one set of values.</li>
+      <li><b>Start inversion</b> — one Markov chain runs for every random seed. With <i>Run chains in parallel</i> the chains use separate CPU threads.</li>
+      <li><b>Run</b> — follow the progress of each chain, the number of model evaluations and the log. A run can be stopped at any time (unfinished chains are not saved).</li>
+      <li><b>Results</b> — posterior statistics, convergence checks (R̂, ESS), interactive densities, traces and pair plots, plus all figures and tables saved in the run folder.</li>
+    </ol>
+    <h3>Parameters</h3>
+    <table>
+      <tr><th>Setting</th><th>Meaning</th></tr>
+      <tr><td>Observed age, uncertainty</td><td>Measured age and its 1σ uncertainty (Myr). Gaussian likelihood.</td></tr>
+      <tr><td>All four parameters</td><td>Uniform prior between min and max, or Gaussian (mean, σ) truncated to [min, max].</td></tr>
+      <tr><td>Total model time t<sub>lim</sub></td><td>Default: Gaussian from an independent age (e.g. hornblende) truncated at mean ± 3σ — <i>Set limits to mean ± 3σ</i> fills the limits. If you know a 2σ value, enter half of it as σ.</td></tr>
+      <tr><td>P–T–t path</td><td><code>asy-CR</code> asymptotic cooling, <code>lin-CR</code> linear cooling, <code>lin-P-T</code> linear P and T from (P₀, T₀) to (P<sub>min</sub>, T<sub>min</sub>), <code>iso-T</code> constant T, <code>loaded</code> your own table. Temperature never drops below T<sub>min</sub>, pressure never below P<sub>min</sub>.</td></tr>
+      <tr><td>Geometry</td><td>Diffusion domain shape: plane sheet, cylinder or sphere.</td></tr>
+      <tr><td>Mineral system</td><td>Diffusion parameters (D₀, Ea, Va, reference pressure). <code>custom</code> uses your own values.</td></tr>
+      <tr><td>Samples per chain</td><td>Number of draws kept per chain. NUTS adapts its step size during an additional warm-up phase.</td></tr>
+      <tr><td>Random seeds</td><td>One chain per seed. Use ≥ 4 chains to judge convergence with R̂.</td></tr>
+      <tr><td>n<sub>t</sub>, n<sub>els</sub>, θ, RdX</td><td>Time steps, number of elements, time-integration parameter and grid refinement of the diffusion solver.</td></tr>
+      <tr><td>Linear solver</td><td><b>Direct</b> uses the fast derivative-aware sparse solve of the new KADMOS code. Cholesky can only be used for the forward model check: the sparse Cholesky factorisation does not support the dual numbers used for HMC gradients.</td></tr>
+    </table>
+    <h3>Reading the results</h3>
+    <ul>
+      <li><b>R̂</b> (potential scale reduction) compares chains: values below <b>1.01</b> are good, above 1.05 the chains have not converged — run longer or check the priors.</li>
+      <li><b>ESS</b> (effective sample size) is the number of independent draws equivalent to the correlated chain. Aim for several hundred.</li>
+      <li><b>Divergences</b> (numerical errors) indicate regions the sampler could not explore well.</li>
+      <li>The densities show the pooled posterior (all chains); thin lines are the individual chains, the dashed line is the prior.</li>
+    </ul>
+    <h3>Output files (in <code>results/&lt;run name&gt;</code>)</h3>
+    <p><code>posterior_samples.csv</code>, <code>run_summary.txt</code>, <code>rhat_values.csv</code> for every chain (chain 1 in the run folder, chain k in <code>chain_k/</code>); pooled <code>density_plots</code> and <code>trace_plots</code>; <code>chain_comparison_*</code>, <code>chain_autocorrelation</code>, <code>multichain_diagnostics.csv</code>, <code>run_statistics.txt</code>; and <code>config.json</code> with all settings so a run can be reloaded with <i>Load settings</i>.</p>
+    <h3>References</h3>
+    <p>KADMOS (MATLAB): Moulas &amp; Brandon (2022), doi: 10.5281/zenodo.7358136. Julia translation and HMC implementation: D. Moutzouris (2025), doi: 10.5281/zenodo.18247900.</p>
+  </div></div>
+</section>
+</main>
+
+<div class="toasts" id="toasts"></div>
+<script src="/static/charts.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
