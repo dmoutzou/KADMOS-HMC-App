@@ -14,6 +14,7 @@ The interface opens in your web browser. Results are saved in ./results.
 Original KADMOS (MATLAB): Moulas & Brandon (2022), doi: 10.5281/zenodo.7358136
 Julia translation and HMC implementation: D. Moutzouris (2025),
 https://doi.org/10.5281/zenodo.18247900
+KADMOS HMC App: D. Moutzouris (2026), https://doi.org/10.5281/zenodo.24397573
 =============================================================================#
 
 const APP_DIR = @__DIR__

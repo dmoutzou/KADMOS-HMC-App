@@ -13,7 +13,8 @@
   <img alt="Julia 1.11" src="https://img.shields.io/badge/Julia-1.11-9558B2?logo=julia&logoColor=white">
   <img alt="Windows, macOS, Linux" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-0f6e6e">
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue"></a>
-  <a href="https://doi.org/10.5281/zenodo.18247900"><img alt="DOI 10.5281/zenodo.18247900" src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.18247900-blue"></a>
+  <a href="https://doi.org/10.5281/zenodo.24397573"><img alt="App DOI 10.5281/zenodo.24397573" src="https://img.shields.io/badge/App%20DOI-10.5281%2Fzenodo.24397573-blue"></a>
+  <a href="https://doi.org/10.5281/zenodo.18247900"><img alt="Publication DOI 10.5281/zenodo.18247900" src="https://img.shields.io/badge/Publication%20DOI-10.5281%2Fzenodo.18247900-blue"></a>
 </p>
 
 <p align="center">
@@ -236,3 +237,4 @@ the browser's site data and are harmless otherwise.
 
 KADMOS (MATLAB): E. Moulas & M. T. Brandon (2022), doi: 10.5281/zenodo.7358136.
 Julia translation and HMC implementation: D. Moutzouris (2025), doi: 10.5281/zenodo.18247900.
+KADMOS HMC App (this software): D. Moutzouris (2026), doi: [10.5281/zenodo.24397573](https://doi.org/10.5281/zenodo.24397573).
